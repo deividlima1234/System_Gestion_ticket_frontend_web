@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# Sistema de Gestión de Tickets
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Una plataforma moderna y robusta para la gestión eficiente de incidencias y soporte técnico. Diseñada para optimizar el flujo de trabajo entre usuarios y equipos de soporte, ofreciendo una experiencia de usuario premium con una interfaz oscura y elegante.
 
-Currently, two official plugins are available:
+## 🚀 Características Principales
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🎫 Gestión de Tickets
+- **Creación y Seguimiento**: Los usuarios pueden reportar incidencias detalladas y seguir su estado en tiempo real.
+- **Clasificación**: Organización por prioridad (Baja, Media, Alta, Crítica) y estado (Abierto, En Progreso, Resuelto, Cerrado).
+- **Interfaz Intuitiva**: Listados claros y tarjetas de detalle con toda la información relevante.
 
-## React Compiler
+### 💬 Comunicación en Tiempo Real
+- **Chat Integrado**: Sistema de comentarios tipo chat en cada ticket para una comunicación fluida.
+- **Scroll Inteligente**: Contenedor de mensajes optimizado con auto-scroll y diseño limpio.
+- **Historial Completo**: Registro de todas las interacciones y actualizaciones.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 👥 Gestión de Usuarios (Admin)
+- **Panel de Administración**: Control total sobre los usuarios registrados.
+- **Roles y Permisos**: Sistema de roles (Admin, Soporte, Usuario) para controlar el acceso a funcionalidades.
+- **CRUD Completo**: Crear, editar y eliminar usuarios con facilidad.
 
-## Expanding the ESLint configuration
+### 👤 Perfil de Usuario
+- **Personalización**: Actualización de información personal y credenciales de acceso.
+- **Seguridad**: Cambio de contraseña seguro y validado.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🎨 Experiencia de Usuario (UX/UI)
+- **Diseño Moderno**: Interfaz "Dark Mode" por defecto, utilizando una paleta de colores profesional.
+- **Responsive**: Totalmente adaptable a dispositivos móviles y de escritorio.
+- **Feedback Visual**: Notificaciones, estados de carga (skeletons) y transiciones suaves.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Stack Tecnológico
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Este proyecto está construido con las últimas tecnologías web para garantizar rendimiento, escalabilidad y mantenibilidad:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Frontend Core**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Estilos**: [Tailwind CSS 4](https://tailwindcss.com/) (PostCSS)
+- **Estado y Data Fetching**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
+- **Enrutamiento**: [React Router 7](https://reactrouter.com/)
+- **Iconos**: [Lucide React](https://lucide.dev/)
+- **Utilidades**: `clsx`, `tailwind-merge`
+
+## 📋 Requisitos Previos
+
+Asegúrate de tener instalado lo siguiente en tu entorno de desarrollo:
+
+- [Node.js](https://nodejs.org/) (Versión 18 o superior recomendada)
+- [npm](https://www.npmjs.com/) o [yarn](https://yarnpkg.com/)
+
+## 🔧 Instalación y Uso
+
+1.  **Clonar el repositorio**
+    ```bash
+    git clone https://github.com/tu-usuario/system-gestion-ticket-frontend-web.git
+    cd system-gestion-ticket-frontend-web
+    ```
+
+2.  **Instalar dependencias**
+    ```bash
+    npm install
+    ```
+
+3.  **Ejecutar el servidor de desarrollo**
+    ```bash
+    npm run dev
+    ```
+    La aplicación estará disponible en `http://localhost:5173`.
+
+4.  **Construir para producción**
+    ```bash
+    npm run build
+    ```
+
+## 📂 Estructura del Proyecto
+
+```
+src/
+├── components/      # Componentes reutilizables (UI, Layout, Features)
+├── context/         # Contextos de React (Auth, Theme, etc.)
+├── pages/           # Vistas principales de la aplicación
+├── services/        # Lógica de comunicación con la API
+├── types/           # Definiciones de tipos TypeScript
+├── utils/           # Funciones de utilidad
+├── App.tsx          # Configuración de rutas principal
+└── index.css        # Estilos globales y configuración de Tailwind
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🤝 Contribución
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Las contribuciones son bienvenidas. Por favor, abre un issue o envía un pull request para discutir cambios mayores.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+Desarrollado con ❤️ por el equipo de desarrollo.
