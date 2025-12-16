@@ -1,0 +1,306 @@
+# **Documento Base para el Desarrollo del Sistema de Atención y Registro de Incidentes TI**
+
+## **1. Introducción**
+
+El presente documento tiene como finalidad servir como **base técnica y funcional** para el desarrollo de un **Sistema Web de Atención y Registro de Incidentes (Mesa de Ayuda TI)**, orientado a una empresa con aproximadamente **150 usuarios internos**.
+
+Este sistema será desarrollado bajo un enfoque de **desarrollo propio**, permitiendo personalización total, control de la información y escalabilidad futura.
+
+---
+
+## **2. Objetivo General**
+
+Diseñar e implementar un sistema web que permita:
+
+* Registrar incidencias y solicitudes de soporte TI.
+* Gestionar y dar seguimiento a tickets de atención.
+* Mejorar los tiempos de respuesta y resolución.
+* Mantener trazabilidad e historial de incidencias.
+* Obtener métricas para la toma de decisiones del área de TI.
+
+---
+
+## **3. Alcance del Sistema**
+
+### **3.1 Alcance Funcional**
+
+El sistema permitirá:
+
+* Autenticación de usuarios mediante login.
+* Creación, seguimiento y cierre de tickets.
+* Gestión de tickets por parte del área de soporte.
+* Notificaciones automáticas.
+* Generación de reportes básicos.
+
+### **3.2 Alcance Técnico**
+
+* Aplicación web accesible desde navegador.
+* Arquitectura frontend + backend desacoplados.
+* Base de datos centralizada y segura.
+
+---
+
+## **4. Usuarios del Sistema**
+
+### **4.1 Usuarios Finales (Colaboradores)**
+
+* Aproximadamente 150 usuarios.
+* Registran incidencias.
+* Consultan el estado de sus tickets.
+* Reciben notificaciones.
+
+### **4.2 Personal de Soporte TI**
+
+* Visualiza y gestiona todos los tickets.
+* Asigna incidencias a técnicos.
+* Actualiza estados y responde a usuarios.
+* Accede a reportes y métricas.
+
+---
+
+## **5. Funcionalidades del Sistema**
+
+### **5.1 Módulo de Autenticación**
+
+* Login de usuarios.
+* Gestión de sesiones.
+* Roles y permisos (usuario / soporte / administrador).
+
+---
+
+### **5.2 Módulo de Gestión de Tickets (Usuarios)**
+
+* Creación de tickets mediante formulario.
+* Campos del ticket:
+
+  * Usuario (autocompletado).
+  * Tipo de incidencia (hardware, software, red, otros).
+  * Prioridad (alta, media, baja).
+  * Descripción detallada.
+  * Adjuntar archivos.
+* Generación automática de número de ticket.
+* Visualización del estado del ticket.
+* Historial de tickets por usuario.
+
+---
+
+### **5.3 Módulo de Gestión de Tickets (Soporte TI)**
+
+* Dashboard de tickets.
+* Filtros por estado, prioridad, tipo y usuario.
+* Asignación de tickets a técnicos.
+* Actualización del estado del ticket.
+* Respuesta al usuario.
+* Comentarios internos (solo visibles para TI).
+* Registro de historial de acciones.
+
+---
+
+### **5.4 Módulo de Notificaciones**
+
+* Notificaciones automáticas por correo electrónico:
+
+  * Creación de ticket.
+  * Cambio de estado.
+  * Respuesta del técnico.
+
+---
+
+### **5.5 Módulo de Reportes (Fase Inicial)**
+
+* Cantidad de tickets por estado.
+* Tickets por tipo de incidencia.
+* Tiempo promedio de resolución.
+
+---
+
+## **6. Diseño y Experiencia de Usuario (UI/UX)**
+
+### **6.1 Paleta de Colores**
+
+* Rojo: botones, alertas, prioridades.
+* Negro: fondos principales.
+* Blanco: textos y formularios.
+* Tonos grises y rojo oscuro como colores complementarios.
+
+**Estilo visual:** Moderno – Profesional – Tecnológico.
+
+---
+
+## **7. Arquitectura Tecnológica**
+
+### **7.1 Frontend**
+
+* Framework: **React**
+* Tipo: SPA (Single Page Application)
+* Comunicación con backend mediante API REST
+
+
+
+**Módulos del Frontend**
+
+### **Módulo 1: Autenticación**
+
+* Login
+* Manejo de token
+* Protección de rutas
+
+**Prueba:**
+
+* Acceso sin login bloqueado
+* Token guardado correctamente
+
+---
+
+### **Módulo 2: Panel de Usuario**
+
+* Crear ticket
+* Ver estado
+* Historial
+
+**Prueba:**
+
+* Ticket creado desde UI
+* Estado actualizado
+
+---
+
+### **Módulo 3: Panel de Soporte**
+
+* Lista de tickets
+* Filtros
+* Asignación
+
+**Prueba:**
+
+* Cambio de estado reflejado
+
+---
+
+### **Módulo 4: Dashboard**
+
+* Estadísticas
+* Gráficos
+
+**Prueba:**
+
+* Datos correctos
+
+---
+
+
+**apis para consumir de Backend**
+
+📚 Documentación de la API y Pruebas
+A continuación se detallan los endpoints principales con ejemplos de cómo probarlos usando curl.
+
+1. Autenticación
+🔐 Login
+Obtiene un token de acceso.
+
+Endpoint: POST /api/v1/login
+Body:
+{
+    "email": "test@example.com",
+    "password": "password"
+}
+Prueba (Curl):
+
+curl -X POST http://127.0.0.1:8000/api/v1/login \
+-H "Content-Type: application/json" \
+-d '{"email":"test@example.com", "password":"password"}'
+Respuesta Esperada (200 OK):
+
+{
+    "access_token": "1|...token_hash...",
+    "token_type": "Bearer"
+}
+Nota: Copia el access_token recibido, lo necesitarás para las siguientes peticiones en el header Authorization.
+
+2. Gestión de Tickets
+📝 Crear Ticket
+Endpoint: POST /api/v1/tickets
+Headers: Authorization: Bearer <TOKEN>
+Body:
+{
+    "title": "Fallo en impresora",
+    "description": "La impresora del piso 2 no responde.",
+    "priority": "high"
+}
+Prueba (Curl):
+
+curl -X POST http://127.0.0.1:8000/api/v1/tickets \
+-H "Authorization: Bearer <TOKEN>" \
+-H "Content-Type: application/json" \
+-d '{"title":"Fallo en impresora", "description":"La impresora del piso 2 no responde.", "priority":"high"}'
+📋 Listar Tickets
+Endpoint: GET /api/v1/tickets
+Headers: Authorization: Bearer <TOKEN>
+Regla: Los usuarios normales ven solo sus tickets. Admin/Soporte ven todos.
+Prueba (Curl):
+
+curl -X GET http://127.0.0.1:8000/api/v1/tickets \
+-H "Authorization: Bearer <TOKEN>" \
+-H "Content-Type: application/json"
+🔄 Actualizar Estado (Solo Admin/Soporte)
+Endpoint: PUT /api/v1/tickets/{id}
+Headers: Authorization: Bearer <TOKEN_ADMIN>
+Body:
+{
+    "status": "in_progress"
+}
+Prueba (Curl):
+
+curl -X PUT http://127.0.0.1:8000/api/v1/tickets/1 \
+-H "Authorization: Bearer <TOKEN_ADMIN>" \
+-H "Content-Type: application/json" \
+-d '{"status":"in_progress"}'
+3. Comentarios y Asignación
+💬 Agregar Comentario
+Endpoint: POST /api/v1/tickets/{id}/comments
+Headers: Authorization: Bearer <TOKEN>
+Body:
+{
+    "content": "Ya reinicié el equipo y sigue igual."
+}
+Prueba (Curl):
+
+curl -X POST http://127.0.0.1:8000/api/v1/tickets/1/comments \
+-H "Authorization: Bearer <TOKEN>" \
+-H "Content-Type: application/json" \
+-d '{"content":"Ya reinicié el equipo y sigue igual."}'
+👤 Asignar Técnico (Solo Admin/Soporte)
+Endpoint: PUT /api/v1/tickets/{id}/assign
+Headers: Authorization: Bearer <TOKEN_ADMIN>
+Body:
+{
+    "assigned_to": 2
+}
+Prueba (Curl):
+
+curl -X PUT http://127.0.0.1:8000/api/v1/tickets/1/assign \
+-H "Authorization: Bearer <TOKEN_ADMIN>" \
+-H "Content-Type: application/json" \
+-d '{"assigned_to":2}'
+📧 Notificaciones (Logs)
+El sistema está configurado para usar el driver log para correos electrónicos en entorno local. Puedes verificar las notificaciones enviadas (Creación de Ticket, Cambio de Estado) revisando el archivo de logs:
+
+tail -f storage/logs/laravel.log
+🧪 Usuarios de Prueba (Seeders)
+Puedes crear usuarios manualmente usando php artisan tinker:
+
+// Usuario Normal
+User::factory()->create([
+    'name' => 'Test User',
+    'email' => 'user@example.com',
+    'password' => bcrypt('password'),
+    'role' => 'user'
+]);
+
+// Administrador
+User::factory()->create([
+    'name' => 'Admin User',
+    'email' => 'admin@example.com',
+    'password' => bcrypt('password'),
+    'role' => 'admin'
+]);
