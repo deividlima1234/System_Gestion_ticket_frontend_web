@@ -39,9 +39,15 @@ export const TicketList = () => {
     };
 
     const isAdmin = user?.role === 'admin';
+    const isSupport = user?.role === 'support';
 
     // Filter logic
     const filteredTickets = tickets?.filter(ticket => {
+        // Support restriction: Can ONLY see assigned tickets
+        if (isSupport && ticket.assigned_to !== user?.id) {
+            return false;
+        }
+
         if (ticket.status !== 'closed') return true;
 
         // Closed tickets
