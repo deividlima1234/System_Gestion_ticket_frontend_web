@@ -51,7 +51,7 @@ Asegúrate de tener instalado lo siguiente en tu entorno de desarrollo:
 
 1.  **Clonar el repositorio**
     ```bash
-    git clone https://github.com/tu-usuario/system-gestion-ticket-frontend-web.git
+    git clone https://github.com/deividlima1234/System_Gestion_ticket_frontend_web.git
     cd system-gestion-ticket-frontend-web
     ```
 
@@ -91,4 +91,4 @@ Las contribuciones son bienvenidas. Por favor, abre un issue o envía un pull re
 
 ---
 
-Desarrollado con ❤️ por el equipo de desarrollo.
+Desarrollado con ❤️ por Deivid_code.

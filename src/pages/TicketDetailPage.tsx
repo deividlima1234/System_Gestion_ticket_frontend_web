@@ -1,6 +1,6 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ticketService } from '../services/ticketService';
 import { userService } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +15,7 @@ export const TicketDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const ticketId = Number(id);
+    const queryClient = useQueryClient();
 
     const { data: ticket, isLoading: isTicketLoading } = useQuery({
         queryKey: ['ticket', ticketId],
@@ -29,16 +30,39 @@ export const TicketDetailPage = () => {
         enabled: user?.role === 'admin',
     });
 
+    // Fetch support users for assignment (only if admin)
+    const { data: supportUsers } = useQuery({
+        queryKey: ['supportUsers'],
+        queryFn: async () => {
+            const allUsers = await userService.getUsers();
+            return allUsers.filter(u => u.role === 'support');
+        },
+        enabled: user?.role === 'admin',
+    });
+
     const creatorName = (user && ticket && user.id === ticket.user_id)
         ? user.name
         : users?.find(u => u.id === ticket?.user_id)?.name;
 
     // Fetch comments separately if not included in ticket
-    // Based on my service assumption, I added a getComments method.
     const { data: comments } = useQuery({
         queryKey: ['comments', ticketId],
         queryFn: () => ticketService.getComments(ticketId),
         enabled: !!ticketId,
+    });
+
+    const updateStatusMutation = useMutation({
+        mutationFn: (status: any) => ticketService.updateTicket(ticketId, { status }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] });
+        },
+    });
+
+    const assignMutation = useMutation({
+        mutationFn: (userId: number) => ticketService.assignTicket(ticketId, userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] });
+        },
     });
 
     if (isTicketLoading) {
@@ -67,7 +91,14 @@ export const TicketDetailPage = () => {
                 Volver a Tickets
             </Button>
 
-            <TicketDetail ticket={ticket} creatorName={creatorName} />
+            <TicketDetail
+                ticket={ticket}
+                creatorName={creatorName}
+                supportUsers={supportUsers}
+                onStatusChange={(status) => updateStatusMutation.mutate(status)}
+                onAssign={(userId) => assignMutation.mutate(userId)}
+                isUpdating={updateStatusMutation.isPending || assignMutation.isPending}
+            />
 
             <div className="border-t border-dark-border pt-8">
                 <h3 className="text-xl font-bold text-white mb-6">Comentarios</h3>
