@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { profileService } from '../services/profileService';
 import type { User } from '../types/auth';
+import { SessionConflictModal } from '../components/auth/SessionConflictModal';
 
 interface AuthContextType {
     user: User | null;
@@ -21,6 +22,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const queryClient = useQueryClient();
 
+    // Multi-tab management state
+    const [isTabActive, setIsTabActive] = useState(true);
+    const [tabId] = useState(() => Math.random().toString(36).substr(2, 9));
+
     // Auto-logout configuration (15 minutes)
     const AUTO_LOGOUT_TIME = 15 * 60 * 1000;
 
@@ -33,9 +38,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         queryClient.clear(); // Clear mutation cache and others
     };
 
-    // Auto-logout logic
+    // BroadcastChannel logic for multi-tab management
     useEffect(() => {
-        if (!token) return;
+        const channel = new BroadcastChannel('auth_channel');
+
+        channel.onmessage = (event) => {
+            if (event.data.type === 'NEW_TAB_OPENED') {
+                // Another tab opened, if we are active, we claim leadership to let them know
+                if (isTabActive) {
+                    channel.postMessage({ type: 'CLAIM_LEADERSHIP', tabId });
+                }
+            } else if (event.data.type === 'CLAIM_LEADERSHIP') {
+                // Another tab claimed leadership, we must pause
+                if (event.data.tabId !== tabId) {
+                    setIsTabActive(false);
+                }
+            }
+        };
+
+        // Announce we are here when we mount (new tab)
+        channel.postMessage({ type: 'NEW_TAB_OPENED', tabId });
+        // New tab always starts as active (claiming leadership implicitly by being the latest)
+        // But to be sure, we can claim it explicitly
+        channel.postMessage({ type: 'CLAIM_LEADERSHIP', tabId });
+
+        return () => {
+            channel.close();
+        };
+    }, [tabId]);
+
+    const handleClaimSession = () => {
+        setIsTabActive(true);
+        const channel = new BroadcastChannel('auth_channel');
+        channel.postMessage({ type: 'CLAIM_LEADERSHIP', tabId });
+        channel.close();
+    };
+
+    // Auto-logout logic (Only runs if tab is active)
+    useEffect(() => {
+        if (!token || !isTabActive) return;
 
         let timeoutId: ReturnType<typeof setTimeout>;
 
@@ -65,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 window.removeEventListener(event, resetTimer);
             });
         };
-    }, [token]); // Re-run when token changes (login/logout)
+    }, [token, isTabActive]); // Re-run when token or active state changes
 
     useEffect(() => {
         const initAuth = async () => {
@@ -99,6 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem('user', JSON.stringify(newUser));
             setUser(newUser);
         }
+        // When logging in, we claim session
+        handleClaimSession();
     };
 
     return (
@@ -111,6 +154,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             logout
         }}>
             {children}
+            {!isTabActive && token && (
+                <SessionConflictModal onClaimSession={handleClaimSession} />
+            )}
         </AuthContext.Provider>
     );
 };

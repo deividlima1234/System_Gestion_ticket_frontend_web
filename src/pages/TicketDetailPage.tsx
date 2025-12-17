@@ -17,20 +17,19 @@ export const TicketDetailPage = () => {
     const ticketId = Number(id);
     const queryClient = useQueryClient();
 
-    const { data: ticket, isLoading: isTicketLoading } = useQuery({
+    const { data: ticket, isLoading: isTicketLoading, error } = useQuery({
         queryKey: ['ticket', ticketId],
         queryFn: () => ticketService.getTicket(ticketId),
         enabled: !!ticketId,
+        retry: false, // Don't retry if it's a 403
     });
 
-    // Fetch users only if the current user is an admin to display creator name
     const { data: users } = useQuery({
         queryKey: ['users'],
         queryFn: userService.getUsers,
         enabled: user?.role === 'admin',
     });
 
-    // Fetch support users for assignment (only if admin)
     const { data: supportUsers } = useQuery({
         queryKey: ['supportUsers'],
         queryFn: async () => {
@@ -44,7 +43,6 @@ export const TicketDetailPage = () => {
         ? user.name
         : users?.find(u => u.id === ticket?.user_id)?.name;
 
-    // Fetch comments separately if not included in ticket
     const { data: comments } = useQuery({
         queryKey: ['comments', ticketId],
         queryFn: () => ticketService.getComments(ticketId),
@@ -69,6 +67,29 @@ export const TicketDetailPage = () => {
         return (
             <div className="flex justify-center items-center h-64">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    // Handle 403 Forbidden (or other errors)
+    if (error) {
+        const isForbidden = (error as any)?.response?.status === 403;
+
+        return (
+            <div className="text-center py-12 max-w-2xl mx-auto">
+                <div className="bg-dark-surface border border-dark-border rounded-lg p-8 shadow-xl">
+                    <h2 className="text-xl font-bold text-white mb-4">
+                        {isForbidden ? 'Ticket Archivado' : 'Error'}
+                    </h2>
+                    <p className="text-light-muted mb-6">
+                        {isForbidden
+                            ? 'Este ticket ha sido cerrado y archivado. Contacte a un administrador si necesita reabrirlo.'
+                            : 'Hubo un error al cargar el ticket.'}
+                    </p>
+                    <Button variant="ghost" onClick={() => navigate('/tickets')}>
+                        Volver a la lista
+                    </Button>
+                </div>
             </div>
         );
     }

@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ticketService } from '../../services/ticketService';
 import { userService } from '../../services/userService';
@@ -11,6 +12,8 @@ import { Calendar, User as UserIcon } from 'lucide-react';
 
 export const TicketList = () => {
     const { user } = useAuth();
+    const [showHistory, setShowHistory] = useState(false);
+
     const { data: tickets, isLoading: isTicketsLoading, isError } = useQuery({
         queryKey: ['tickets'],
         queryFn: ticketService.getTickets,
@@ -25,6 +28,37 @@ export const TicketList = () => {
     const getUserName = (userId: number) => {
         if (user && user.id === userId) return user.name;
         return users?.find(u => u.id === userId)?.name || 'Usuario';
+    };
+
+    const isToday = (dateString: string) => {
+        const date = new Date(dateString);
+        const today = new Date();
+        return date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear();
+    };
+
+    const isAdmin = user?.role === 'admin';
+
+    // Filter logic
+    const filteredTickets = tickets?.filter(ticket => {
+        if (ticket.status !== 'closed') return true;
+
+        // Closed tickets
+        if (isAdmin) {
+            // Admin sees closed if "Show History" is on OR if it's from today
+            return showHistory || isToday(ticket.updated_at);
+        }
+
+        // Non-admin sees closed ONLY if it's from today (Backend filters older ones too, but good to be safe)
+        return isToday(ticket.updated_at);
+    });
+
+    const handleTicketClick = (e: React.MouseEvent, ticket: any) => {
+        if (ticket.status === 'closed' && !isAdmin) {
+            e.preventDefault();
+            alert("Este ticket ha sido cerrado y archivado. Contacte a un administrador si necesita reabrirlo.");
+        }
     };
 
     const isLoading = isTicketsLoading;
@@ -59,25 +93,57 @@ export const TicketList = () => {
         );
     }
 
-    if (!tickets || tickets.length === 0) {
+    if (!filteredTickets || filteredTickets.length === 0) {
         return (
-            <div className="text-center p-12 bg-dark-surface border border-dark-border rounded-lg">
-                <p className="text-light-muted">No hay tickets registrados.</p>
+            <div className="space-y-4">
+                {isAdmin && (
+                    <div className="flex justify-end mb-4">
+                        <label className="flex items-center gap-2 text-sm text-light-muted cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={showHistory}
+                                onChange={(e) => setShowHistory(e.target.checked)}
+                                className="rounded border-dark-border bg-dark-surface text-primary focus:ring-primary"
+                            />
+                            Mostrar Historial Completo
+                        </label>
+                    </div>
+                )}
+                <div className="text-center p-12 bg-dark-surface border border-dark-border rounded-lg">
+                    <p className="text-light-muted">No se encontraron tickets.</p>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="space-y-4">
-            {tickets.map((ticket) => (
+            {isAdmin && (
+                <div className="flex justify-end mb-4">
+                    <label className="flex items-center gap-2 text-sm text-light-muted cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={showHistory}
+                            onChange={(e) => setShowHistory(e.target.checked)}
+                            className="rounded border-dark-border bg-dark-surface text-primary focus:ring-primary"
+                        />
+                        Mostrar Historial Completo
+                    </label>
+                </div>
+            )}
+
+            {filteredTickets?.map((ticket) => (
                 <Link
                     key={ticket.id}
                     to={`/tickets/${ticket.id}`}
-                    className="block bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
+                    onClick={(e) => handleTicketClick(e, ticket)}
+                    className={`block bg-dark-surface border border-dark-border rounded-lg p-6 transition-colors group ${ticket.status === 'closed' && !isAdmin ? 'opacity-75 cursor-not-allowed hover:border-dark-border' : 'hover:border-primary/50'
+                        }`}
                 >
                     <div className="flex justify-between items-start mb-3">
                         <div>
-                            <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
+                            <h3 className={`text-lg font-semibold text-white transition-colors ${ticket.status === 'closed' && !isAdmin ? '' : 'group-hover:text-primary'
+                                }`}>
                                 {ticket.title}
                             </h3>
                             <p className="text-light-muted text-sm mt-1 line-clamp-2">
@@ -102,6 +168,12 @@ export const TicketList = () => {
                     </div>
                 </Link>
             ))}
+
+            {filteredTickets?.length === 0 && (
+                <div className="text-center p-12 bg-dark-surface border border-dark-border rounded-lg">
+                    <p className="text-light-muted">No se encontraron tickets.</p>
+                </div>
+            )}
         </div>
     );
 };
