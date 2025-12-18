@@ -1,4 +1,5 @@
 
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ticketService } from '../services/ticketService';
@@ -8,7 +9,8 @@ import { TicketDetail } from '../components/tickets/TicketDetail';
 import { CommentList } from '../components/comments/CommentList';
 import { AddCommentForm } from '../components/comments/AddCommentForm';
 import { Button } from '../components/ui/Button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Skeleton } from '../components/ui/Skeleton';
+import { ArrowLeft } from 'lucide-react';
 
 export const TicketDetailPage = () => {
     const { user } = useAuth();
@@ -65,11 +67,47 @@ export const TicketDetailPage = () => {
 
     if (isTicketLoading) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="max-w-4xl mx-auto space-y-8">
+                {/* Back button skeleton */}
+                <Skeleton className="h-4 w-32" />
+
+                <div className="bg-dark-surface border border-dark-border rounded-lg p-8 shadow-xl">
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="space-y-2">
+                            <Skeleton className="h-8 w-64" />
+                            <div className="flex items-center gap-4">
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-4 w-32" />
+                            </div>
+                        </div>
+                        <Skeleton className="h-8 w-24 rounded-full" />
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-2 mb-8">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                    </div>
+
+                    {/* Controls */}
+                    <div className="flex flex-wrap gap-4 pt-6 border-t border-dark-border mb-8">
+                        <Skeleton className="h-10 w-32" />
+                        <Skeleton className="h-10 w-48" />
+                        <Skeleton className="h-10 w-64" />
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex gap-6 pt-6 border-t border-dark-border">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
+                </div>
             </div>
         );
     }
+
 
     // Handle 403 Forbidden (or other errors)
     if (error) {
