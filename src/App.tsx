@@ -9,15 +9,9 @@ import { ProfilePage } from './pages/ProfilePage';
 import { UsersPage } from './pages/UsersPage';
 import { AdminRoute } from './components/layout/AdminRoute';
 
-// Placeholder for Dashboard/Tickets page until implemented
-const DashboardPlaceholder = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-white mb-4">Dashboard</h1>
-    <div className="max-h-[750px] overflow-y-auto no-scrollbar">
-      <p className="text-light-muted">Bienvenido al Sistema de Gestión de Tickets.</p>
-    </div>
-  </div>
-);
+import { DashboardPage } from './pages/DashboardPage';
+
+// ... (previous imports)
 
 function App() {
   return (
@@ -27,7 +21,7 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<DashboardPlaceholder />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tickets" element={<TicketsPage />} />
             <Route path="/tickets/:id" element={<TicketDetailPage />} />
             <Route path="/profile" element={<ProfilePage />} />
