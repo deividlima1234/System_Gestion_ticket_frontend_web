@@ -8,7 +8,7 @@ export const DashboardLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="flex min-h-screen bg-dark">
+        <div className="flex h-screen overflow-hidden bg-dark">
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <main className="flex-1 p-8 overflow-y-auto relative w-full">
